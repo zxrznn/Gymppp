@@ -457,7 +457,11 @@
         const coachPromptEl = document.getElementById('coach-prompt');
 
         async function fetchGeminiAdvice(query) {
-            const apiKey = ""; 
+            // HINWEIS: Um den KI-Coach über einen öffentlichen Link (wie GitHub Pages) nutzen zu können,
+            // MÜSSEN Sie hier Ihren persönlichen Gemini API-Schlüssel einfügen.
+            // Ersetzen Sie "IHREN_API_SCHLÜSSEL_HIER" durch Ihren echten Schlüssel, der als String gespeichert ist.
+            // Derzeit funktioniert die App nur in unterstützten Canvas-Umgebungen ohne API-Key.
+            const apiKey = "IHREN_API_SCHLÜSSEL_HIER"; 
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             const systemPrompt = "Du bist ein erfahrener Fitness-Coach. Gib eine prägnante, motivierende und strategische Antwort in deutscher Sprache. Begrüße den Nutzer kurz und gib dann den Tipp. Verwende keine Markdown-Überschriften (wie # oder ##) oder Listen, sondern einen fließenden Text.";
@@ -477,7 +481,14 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    if (!response.ok) {
+                        if (response.status === 400 && attempt === 0) {
+                            // Spezifischer Fehlerhinweis, wenn der Schlüssel fehlt oder ungültig ist
+                            const errorText = "Fehler: Der API-Schlüssel fehlt oder ist ungültig. Bitte trage deinen persönlichen Schlüssel in den Code (Zeile ca. 622) ein, um diese Funktion auf öffentlichen Webseiten zu nutzen.";
+                            return errorText;
+                        }
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
 
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "Entschuldigung, der KI-Coach konnte keine Antwort generieren. Bitte versuche es später noch einmal.";
